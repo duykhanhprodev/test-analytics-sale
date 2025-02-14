@@ -1,0 +1,10 @@
+version: "3"
+services:
+  sale-app:
+    build: .
+    container_name: "sale-app"
+    ports:
+      - 9080:8080
+    env_file: .env
+    volumes:
+      - .:/app
