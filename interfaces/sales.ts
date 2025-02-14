@@ -1,7 +1,4 @@
-export type User = {
-  id: number;
-  name?: string;
-};
+import { z } from "zod";
 
 // Định nghĩa kiểu dữ liệu (NewType)
 export type OrderItem = {
@@ -29,3 +26,10 @@ export const orderItemSchema = z.object({
 
 // Schema cho mảng dữ liệu
 export const orderArraySchema = z.array(orderItemSchema);
+
+
+export interface SalesMetricsResponse {
+  totalSales: number;
+  avgSales: number;
+  bestCategory: string;
+}
