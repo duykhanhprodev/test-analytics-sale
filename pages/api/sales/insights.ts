@@ -4,8 +4,8 @@ import {
   OrderItem,
   SalesMetricsResponse,
 } from "../../../interfaces/sales"; // Kiểm tra đường dẫn import
+import OpenAI from "openai";
 
-// 🔹 Cấu hình API chạy trên Edge Runtime
 export const config = {
   runtime: "edge",
 };
@@ -32,10 +32,13 @@ async function POST(req: NextRequest) {
 
     const metrics = calculateMetrics(orders);
 
-    const summaryHumman = getSummaryHumman(metrics);
-    return NextResponse.json({ metrics: metrics });
+    const summaryHumman = await getSummaryHumman(metrics);
+    return NextResponse.json({
+      metrics: metrics,
+      summaryHumman: summaryHumman,
+    });
   } catch (error) {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: error.stack }, { status: 400 });
   }
 }
 
@@ -61,7 +64,7 @@ function calculateMetrics(data: OrderItem[]): SalesMetricsResponse {
   };
 }
 
-function getSummaryHumman(metrics: SalesMetricsResponse): string {
+async function getSummaryHumman(metrics: SalesMetricsResponse) {
   const prompt = `
     Given the following sales data:
     - Total sales: ${metrics.totalSales}
@@ -70,5 +73,19 @@ function getSummaryHumman(metrics: SalesMetricsResponse): string {
 
     Please summarize this information in a concise and human-friendly way.
     `;
-  return "";
+
+  const openai = new OpenAI();
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: "You are a helpful assistant." },
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    store: true,
+  });
+
+  return completion.choices[0].message.content;
 }
