@@ -24,16 +24,14 @@ WORKDIR /app
 
 # Copy only the necessary files from the build stage
 COPY --from=build /app/.next /app/.next
-COPY --from=build /app/public /app/public
 COPY --from=build /app/package*.json /app/
 COPY --from=build /app/.env /app/.env
-COPY --from=build /app/server.js /app/server.js
 
 # Install only production dependencies
 RUN npm install
 
 # Expose the port on which your Next.js app runs
-EXPOSE 3000
+EXPOSE 8080
 
 # Start the Next.js application
 CMD ["npm", "start"]
