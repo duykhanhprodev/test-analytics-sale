@@ -10,6 +10,9 @@ export const config = {
   runtime: "edge",
 };
 
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 export default async function handler(req: NextRequest) {
   if (req.method === "POST") {
     return POST(req);
@@ -38,7 +41,7 @@ async function POST(req: NextRequest) {
       summaryHumman: summaryHumman,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.stack }, { status: 400 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -55,7 +58,7 @@ function calculateMetrics(data: OrderItem[]): SalesMetricsResponse {
 
   const bestCategory = Object.entries(categorySales).reduce((best, curr) =>
     curr[1] > best[1] ? curr : best
-  )[0];
+  )[0] || "N/A";
 
   return {
     totalSales,
@@ -65,27 +68,33 @@ function calculateMetrics(data: OrderItem[]): SalesMetricsResponse {
 }
 
 async function getSummaryHumman(metrics: SalesMetricsResponse) {
-  const prompt = `
-    Given the following sales data:
-    - Total sales: ${metrics.totalSales}
-    - Average sales per transaction: ${metrics.avgSales}
-    - Best performing category: ${metrics.bestCategory}
+  try {
+    if (!OPENAI_API_KEY) {
+      throw new Error("Missing OpenAI API key");
+    }
 
-    Please summarize this information in a concise and human-friendly way.
+    const prompt = `
+      Given the following sales data:
+      - Total sales: ${metrics.totalSales}
+      - Average sales per transaction: ${metrics.avgSales}
+      - Best performing category: ${metrics.bestCategory}
+
+      Please summarize this information in a concise and human-friendly way.
     `;
 
-  const openai = new OpenAI();
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
-    store: true,
-  });
+    const openai = new OpenAI();
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.7,
+    });
 
-  return completion.choices[0].message.content;
+    return completion.choices[0]?.message?.content || "Summary not available";
+  } catch (error: any) {
+    console.error("OpenAI API Error:", error);
+    return "Could not generate summary due to an error.";
+  }
 }
