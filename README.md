@@ -30,28 +30,26 @@ curl --location 'http://localhost:8080/api/sales/insights' \
 
 Request
 ```
-{
-  "orders": [
-    {
-      "name": "Alice Johnson",
-      "email": "alice.johnson1@example.com",
-      "product": "Widget A",
-      "category": "Widgets",
-      "amount": 120.5,
-      "date": "2023-03-01",
-      "state": "California"
-    },
-    {
-      "name": "Bob Smith",
-      "email": "bob.smith2@example.com",
-      "product": "Widget A",
-      "category": "Widgets",
-      "amount": 85,
-      "date": "2023-03-02",
-      "state": "California"
-    }
-  ]
-}
+[
+  {
+    "name": "Alice Johnson",
+    "email": "alice.johnson1@example.com",
+    "product": "Widget A",
+    "category": "Widgets",
+    "amount": 120.5,
+    "date": "2023-03-01",
+    "state": "California"
+  },
+  {
+    "name": "Bob Smith",
+    "email": "bob.smith2@example.com",
+    "product": "Widget A",
+    "category": "Widgets",
+    "amount": 85,
+    "date": "2023-03-02",
+    "state": "California"
+  }
+]
 ```
 
 Response (200)
@@ -77,11 +75,23 @@ Response (200)
     }
   }
 }
+
+```
+❌ Response (400 - Missing OpenAI API key)
+```
+{
+    "metrics": {
+        "totalSales": 85,
+        "avgSales": 85,
+        "bestCategory": "Widgets"
+    },
+    "summaryHumman": "Could not generate summary due to an error."
+}
 ```
 
 ❌ Response (500 - Internal Server Error)
 ```
 {
-  "error": "Missing OpenAI API key"
+  "error": "Internal Server Error"
 }
 ```

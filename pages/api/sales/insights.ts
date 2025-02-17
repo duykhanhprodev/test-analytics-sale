@@ -3,7 +3,7 @@ import {
   orderArraySchema,
   OrderItem,
   SalesMetricsResponse,
-} from "../../../interfaces/sales"; // Kiểm tra đường dẫn import
+} from "../../../interfaces/sales";
 import OpenAI from "openai";
 
 export const config = {
@@ -23,7 +23,7 @@ export default async function handler(req: NextRequest) {
 
 async function POST(req: NextRequest) {
   try {
-    const body = await req.json(); // Lấy dữ liệu từ body
+    const body = await req.json();
 
     // Validate request body
     const result = orderArraySchema.safeParse(body);
